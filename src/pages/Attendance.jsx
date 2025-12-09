@@ -22,11 +22,17 @@ export default function AttendancePage() {
     setRows(prev => [...prev, { id: docRef.id, ...newRow }]);
   };
 
-  const handleChange = async (id, field, value) => {
-    const docRef = doc(db, "attendance", id);
-    await updateDoc(docRef, { [field]: value });
-    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
-  };
+const addRow = async () => {
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const newRow = { name: "", present: false, absent: false, date: today };
+  try {
+    const docRef = await addDoc(attendanceCollection, newRow);
+    setRows(prev => [...prev, { id: docRef.id, ...newRow }]);
+  } catch (error) {
+    console.error("خطأ في الحفظ:", error);
+    alert("❌ حدث خطأ أثناء الحفظ، حاول مرة أخرى");
+  }
+};
 
   const handleDelete = async (id) => {
     const docRef = doc(db, "attendance", id);
