@@ -7,6 +7,7 @@ export default function AttendancePage() {
   const [rows, setRows] = useState([]);
   const attendanceCollection = collection(db, "attendance");
 
+  // تحميل البيانات عند فتح الصفحة
   useEffect(() => {
     const fetchData = async () => {
       const snapshot = await getDocs(attendanceCollection);
@@ -15,29 +16,41 @@ export default function AttendancePage() {
     fetchData();
   }, []);
 
+  // إضافة صف جديد بتاريخ اليوم
   const addRow = async () => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
     const newRow = { name: "", present: false, absent: false, date: today };
-    const docRef = await addDoc(attendanceCollection, newRow);
-    setRows(prev => [...prev, { id: docRef.id, ...newRow }]);
+    try {
+      const docRef = await addDoc(attendanceCollection, newRow);
+      setRows(prev => [...prev, { id: docRef.id, ...newRow }]);
+    } catch (error) {
+      console.error("خطأ في الحفظ:", error);
+      alert("❌ حدث خطأ أثناء الحفظ، حاول مرة أخرى");
+    }
   };
 
-const addRow = async () => {
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-  const newRow = { name: "", present: false, absent: false, date: today };
-  try {
-    const docRef = await addDoc(attendanceCollection, newRow);
-    setRows(prev => [...prev, { id: docRef.id, ...newRow }]);
-  } catch (error) {
-    console.error("خطأ في الحفظ:", error);
-    alert("❌ حدث خطأ أثناء الحفظ، حاول مرة أخرى");
-  }
-};
+  // تعديل أي حقل
+  const handleChange = async (id, field, value) => {
+    const docRef = doc(db, "attendance", id);
+    try {
+      await updateDoc(docRef, { [field]: value });
+      setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+    } catch (error) {
+      console.error("خطأ في التحديث:", error);
+      alert("❌ حدث خطأ أثناء التحديث، حاول مرة أخرى");
+    }
+  };
 
+  // حذف صف
   const handleDelete = async (id) => {
     const docRef = doc(db, "attendance", id);
-    await deleteDoc(docRef);
-    setRows(prev => prev.filter(r => r.id !== id));
+    try {
+      await deleteDoc(docRef);
+      setRows(prev => prev.filter(r => r.id !== id));
+    } catch (error) {
+      console.error("خطأ في الحذف:", error);
+      alert("❌ حدث خطأ أثناء الحذف، حاول مرة أخرى");
+    }
   };
 
   return (
