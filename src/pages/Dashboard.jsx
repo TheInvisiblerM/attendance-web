@@ -7,10 +7,7 @@ export default function Dashboard() {
       <div className="backdrop-blur-md bg-white/80 p-6 rounded-2xl shadow-xl text-center">
         <h1 className="text-4xl font-bold mb-6 text-red-900">لوحة التحكم</h1>
         <div className="space-y-4">
-          <Link
-            to="/attendance"
-            className="block px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-          >
+          <Link to="/attendance" className="block px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
             📘 تسجيل الحضور والغياب
           </Link>
           <p className="text-gray-700">ممكن تضيف روابط لصفحات تانية هنا لاحقًا.</p>

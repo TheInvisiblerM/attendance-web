@@ -6,6 +6,7 @@ export default function AttendancePage() {
   const [rows, setRows] = useState([]);
   const attendanceCollection = collection(db, "attendance");
 
+  // تحميل البيانات عند فتح الصفحة
   useEffect(() => {
     const fetchData = async () => {
       const querySnapshot = await getDocs(attendanceCollection);
@@ -14,18 +15,21 @@ export default function AttendancePage() {
     fetchData();
   }, []);
 
+  // إضافة صف جديد
   const addRow = async () => {
     const newRow = { name: "", present: false, absent: false, date: "" };
     const docRef = await addDoc(attendanceCollection, newRow);
     setRows(prev => [...prev, { id: docRef.id, ...newRow }]);
   };
 
+  // تعديل أي حقل
   const handleChange = async (id, field, value) => {
     const docRef = doc(db, "attendance", id);
     await updateDoc(docRef, { [field]: value });
     setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
+  // حذف صف
   const handleDelete = async (id) => {
     const docRef = doc(db, "attendance", id);
     await deleteDoc(docRef);
@@ -87,10 +91,7 @@ export default function AttendancePage() {
                   />
                 </td>
                 <td className="p-3">
-                  <button
-                    onClick={() => handleDelete(row.id)}
-                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                  >
+                  <button onClick={() => handleDelete(row.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
                     ❌
                   </button>
                 </td>

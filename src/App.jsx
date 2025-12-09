@@ -106,8 +106,8 @@ export default function AttendancePage() {
 // src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
 import AttendancePage from "./pages/Attendance";
+import Dashboard from "./pages/Dashboard";
 
 export default function App() {
   return (
