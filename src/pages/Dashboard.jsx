@@ -10,7 +10,6 @@ export default function Dashboard() {
           <Link to="/attendance" className="block px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
             📘 تسجيل الحضور والغياب
           </Link>
-          <p className="text-gray-700">ممكن تضيف روابط لصفحات تانية هنا لاحقًا.</p>
         </div>
       </div>
     </div>
