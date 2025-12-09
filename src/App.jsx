@@ -1,6 +1,6 @@
 // src/pages/Attendance.jsx
 import React, { useState, useEffect } from "react";
-import { db } from "../firebase";
+import { db } from "../firebase/firebaseConfig";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 
 export default function AttendancePage() {
@@ -106,7 +106,6 @@ export default function AttendancePage() {
 // src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import AttendancePage from "./pages/Attendance";
 
@@ -114,8 +113,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<Dashboard />} />
         <Route path="/attendance" element={<AttendancePage />} />
       </Routes>
     </Router>
