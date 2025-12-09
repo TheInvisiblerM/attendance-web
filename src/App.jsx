@@ -1,122 +1,99 @@
-// src/pages/Attendance.jsx
-import React, { useState, useEffect } from "react";
-import { db } from "../firebase/firebaseConfig";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
 
-export default function AttendancePage() {
-  const [rows, setRows] = useState([]);
+// --- UI Components ---
+import { Card, CardContent } from "./components/ui/card";  // المسار مضبوط على فولدر components/ui
+import { Button } from "./components/ui/button";
 
-  const attendanceCollection = collection(db, "attendance");
+// --- Auth ---
+const AUTH_USERNAME = "admin";
+const AUTH_PASSWORD = "7813";
 
-  // تحميل البيانات عند فتح الصفحة
-  useEffect(() => {
-    const fetchData = async () => {
-      const querySnapshot = await getDocs(attendanceCollection);
-      setRows(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    };
-    fetchData();
-  }, []);
+function ProtectedRoute({ children }) {
+  const isLogged = localStorage.getItem("logged") === "true";
+  return isLogged ? children : <Navigate to="/" />;
+}
 
-  // إضافة صف جديد
-  const addRow = async () => {
-    const newRow = { name: "", present: false, absent: false, date: "" };
-    const docRef = await addDoc(attendanceCollection, newRow);
-    setRows(prev => [...prev, { id: docRef.id, ...newRow }]);
-  };
+// --- Login Page ---
+function Login() {
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+  const [error, setError] = useState("");
 
-  // تعديل أي حقل
-  const handleChange = async (id, field, value) => {
-    const docRef = doc(db, "attendance", id);
-    await updateDoc(docRef, { [field]: value });
-    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
-  };
-
-  // حذف صف
-  const handleDelete = async (id) => {
-    const docRef = doc(db, "attendance", id);
-    await deleteDoc(docRef);
-    setRows(prev => prev.filter(r => r.id !== id));
-  };
+  function handleLogin() {
+    if (user === AUTH_USERNAME && pass === AUTH_PASSWORD) {
+      localStorage.setItem("logged", "true");
+      window.location.href = "/dashboard";
+    } else {
+      setError("❌ بيانات غير صحيحة");
+    }
+  }
 
   return (
-    <div className="min-h-screen p-6 bg-[url('/church-bg.jpg')] bg-cover bg-center bg-fixed">
-      <div className="backdrop-blur-md bg-white/80 p-6 rounded-2xl shadow-xl">
-        <h1 className="text-3xl font-bold mb-4 text-center text-red-900">📘 حضور و غياب – ملائكة كنيسة السيدة العذراء محرم بك</h1>
-        <button onClick={addRow} className="mb-4 px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition">
-          ➕ إضافة صف جديد
-        </button>
-        <table className="w-full border shadow rounded-xl overflow-hidden text-center">
-          <thead className="bg-red-800 text-white text-lg">
-            <tr>
-              <th className="p-3">#</th>
-              <th className="p-3">اسم الطفل</th>
-              <th className="p-3">الحضور</th>
-              <th className="p-3">الغياب</th>
-              <th className="p-3">التاريخ</th>
-              <th className="p-3">حذف</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr key={row.id} className="even:bg-gray-100 text-lg">
-                <td className="p-3">{index + 1}</td>
-                <td className="p-3">
-                  <input
-                    type="text"
-                    value={row.name}
-                    onChange={(e) => handleChange(row.id, "name", e.target.value)}
-                    className="w-full p-1 border rounded"
-                  />
-                </td>
-                <td className="p-3">
-                  <input
-                    type="checkbox"
-                    checked={row.present}
-                    onChange={(e) => handleChange(row.id, "present", e.target.checked)}
-                  />
-                </td>
-                <td className="p-3">
-                  <input
-                    type="checkbox"
-                    checked={row.absent}
-                    onChange={(e) => handleChange(row.id, "absent", e.target.checked)}
-                  />
-                </td>
-                <td className="p-3">
-                  <input
-                    type="date"
-                    value={row.date}
-                    onChange={(e) => handleChange(row.id, "date", e.target.value)}
-                    className="p-1 border rounded"
-                  />
-                </td>
-                <td className="p-3">
-                  <button onClick={() => handleDelete(row.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">❌</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-50 to-red-100 p-4 bg-[url('/church-bg.jpg')] bg-cover bg-center bg-fixed">
+      <Card className="w-full max-w-md shadow-2xl rounded-2xl p-2 backdrop-blur-lg bg-white/80">
+        <CardContent>
+          <h1 className="text-3xl font-bold text-center mb-4 text-red-900">ملائكة كنيسة السيدة العذراء – محرم بك</h1>
+          <h2 className="text-lg font-semibold text-center mb-6 text-gray-700">تسجيل دخول المسؤول</h2>
+
+          {error && <p className="text-center text-red-600 mb-2">{error}</p>}
+
+          <div className="space-y-4">
+            <input onChange={(e)=>setUser(e.target.value)} placeholder="اسم المستخدم" className="w-full p-3 border rounded-xl" />
+            <input onChange={(e)=>setPass(e.target.value)} placeholder="كلمة المرور" type="password" className="w-full p-3 border rounded-xl" />
+          </div>
+
+          <Button className="w-full text-lg mt-6 rounded-xl" onClick={handleLogin}>تسجيل الدخول</Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// --- Dashboard (مثال مبسط) ---
+function Dashboard() {
+  return (
+    <div className="min-h-screen bg-[url('/church-bg.jpg')] bg-cover bg-center p-6 space-y-6 backdrop-blur-md bg-white/60">
+      <h1 className="text-4xl font-bold text-center text-red-900">لوحة التحكم</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="p-4 rounded-2xl shadow-xl hover:shadow-2xl backdrop-blur-md bg-white/80 transition">
+          <CardContent>
+            <Link to="/attendance" className="text-xl block text-center font-semibold">📘 تسجيل الحضور والغياب</Link>
+          </CardContent>
+        </Card>
+
+        <Card className="p-4 rounded-2xl shadow-xl hover:shadow-2xl backdrop-blur-md bg-white/80 transition">
+          <CardContent>
+            <Link to="/mass" className="text-xl block text-center font-semibold">⛪ تسجيل حضور القداس</Link>
+          </CardContent>
+        </Card>
+
+        <Card className="p-4 rounded-2xl shadow-xl hover:shadow-2xl backdrop-blur-md bg-white/80 transition">
+          <CardContent>
+            <Link to="/children" className="text-xl block text-center font-semibold">👼 إدارة بيانات الأطفال</Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
 
+// --- Simple Pages ---
+function Attendance() { return <h1>Attendance Page</h1>; }
+function Mass() { return <h1>Mass Page</h1>; }
+function Children() { return <h1>Children Page</h1>; }
 
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import AttendancePage from "./pages/Attendance";
-
-function App() {
+// --- App Router ---
+export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/attendance" element={<AttendancePage />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+        <Route path="/mass" element={<ProtectedRoute><Mass /></ProtectedRoute>} />
+        <Route path="/children" element={<ProtectedRoute><Children /></ProtectedRoute>} />
       </Routes>
     </Router>
   );
 }
-
-export default App;
